@@ -32,5 +32,6 @@ void left_start();
 void right_start();
 void back_start();
 start_state_t get_switch_state();
+char *state_to_str(start_state_t cmd);
 
 #endif
