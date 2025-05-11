@@ -16,13 +16,28 @@ start_state_t get_switch_state() {
 }
 
 void left_start() {
-
+    // set motors to turn left
+    while (1) {
+        // wait here
+        // after period of waiting, break
+        break;
+    }
 }
 
 void right_start() {
-
+    // set motors to turn right
+    while (1) {
+        // wait here
+        // after period of waiting, break
+        break;
+    }
 }
 
 void back_start() {
-
+    // set motors to turn 180 deg
+    while (1) {
+        // wait here
+        // after period of waiting, break
+        break;
+    }
 }

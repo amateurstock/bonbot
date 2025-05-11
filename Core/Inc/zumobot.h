@@ -1,3 +1,6 @@
+#ifndef ZUMOBOT_H
+#define ZUMOBOT_H
+
 #include "stm32f103xb.h"
 #include "usbd_cdc_if.h"
 #include "stdio.h"
@@ -16,6 +19,11 @@ typedef enum {
     TRUE
 } bool_t;
 
+typedef struct {
+    GPIO_TypeDef *port;
+    uint16_t pin_number;
+} user_gpio_t;
+
 // Exported functions
 void setup();
 void loop();
@@ -24,3 +32,5 @@ void left_start();
 void right_start();
 void back_start();
 start_state_t get_switch_state();
+
+#endif

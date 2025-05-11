@@ -12,42 +12,35 @@ void setup() {
 void loop() {
     if ((SW1_GPIO_Port->IDR & SW1_Pin) == GPIO_PIN_RESET) {
         state = get_switch_state();
+        return;
     } else {
         switch (state) {
-
             case NORMAL: break;
-
             case LEFT_START: {
                 left_start();
                 state = NORMAL;
                 break;
             }
-
             case RIGHT_START: {
                 right_start();
                 state = NORMAL;
                 break;
             }
-
-
             case BACK_START: {
                 back_start();
                 state = NORMAL;
                 break;
             }
-
             case KAT: {
                 is_kat = TRUE;
                 state = NORMAL;
                 break;
             }
-
             default: {
                 is_tracking = TRUE;
                 state = NORMAL;
                 break;
             }
-
         }
     }
 }
