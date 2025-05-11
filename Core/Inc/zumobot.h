@@ -33,5 +33,6 @@ void right_start();
 void back_start();
 start_state_t get_switch_state();
 char *state_to_str(start_state_t cmd);
+GPIO_PinState user_read_pin(user_gpio_t GPIO);
 
 #endif

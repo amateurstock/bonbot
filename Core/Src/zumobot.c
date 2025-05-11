@@ -1,5 +1,6 @@
 #include "main.h"
 #include "zumobot.h"
+#include "ir_sensors.h"
 
 start_state_t state = TRACKING;
 bool_t is_kat = FALSE;
@@ -8,12 +9,26 @@ char *display;
 char buf[64];
 uint32_t length = 0;
 
+// GPIOs -- Ignore this eyesore, this is just to simplify things...
+user_gpio_t line_left = { .port = Line_Left_GPIO_Port, .pin_number = Line_Left_Pin };
+user_gpio_t line_right = { .port = Line_Right_GPIO_Port, .pin_number = Line_Right_Pin };
+user_gpio_t prox_left = { .port = Prox_Left_GPIO_Port, .pin_number = Prox_Left_Pin };
+user_gpio_t prox_fl = { .port = Prox_FL_GPIO_Port, .pin_number = Prox_FL_Pin };
+user_gpio_t prox_ff = { .port = Prox_FF_GPIO_Port, .pin_number = Prox_FF_Pin };
+user_gpio_t prox_fr = { .port = Prox_FR_GPIO_Port, .pin_number = Prox_FR_Pin };
+user_gpio_t prox_right = { .port = Prox_Right_GPIO_Port, .pin_number = Prox_Right_Pin };
+user_gpio_t sw1 = { .port = SW1_GPIO_Port, .pin_number = SW1_Pin };
+user_gpio_t sw2 = { .port = SW2_GPIO_Port, .pin_number = SW2_Pin };
+user_gpio_t sw3 = { .port = SW3_GPIO_Port, .pin_number = SW3_Pin };
+user_gpio_t sw4 = { .port = SW4_GPIO_Port, .pin_number = SW4_Pin };
+
+
 void setup() {
     state = get_switch_state();
 }
 
 void loop() {
-    if ((SW1_GPIO_Port->IDR & SW1_Pin) == GPIO_PIN_RESET) {
+    if ((sw1.port->IDR & sw1.pin_number) == GPIO_PIN_RESET) {
         is_kat = FALSE;
         is_tracking = FALSE;
         state = get_switch_state();
@@ -86,4 +101,8 @@ void loop() {
             HAL_Delay(1000);
         }
     }
+}
+
+GPIO_PinState user_read_pin(user_gpio_t GPIO) {
+    return HAL_GPIO_ReadPin(GPIO.port, GPIO.pin_number);
 }
