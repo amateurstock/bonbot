@@ -114,6 +114,15 @@ void normal() {
     }
 }
 
+void turn_around() {
+    debug_message("turn_around, motor control");
+    HAL_Delay(500);
+    debug_message("turn_around, motor control");
+    HAL_Delay(500);
+    debug_message("turn_around, motor control");
+    return;
+}
+
 char *state_to_str(start_state_t cmd) {
     switch (cmd) {
         case NORMAL: return "Normal";
