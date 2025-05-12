@@ -4,6 +4,9 @@
 
 extern char buf[64];
 extern uint32_t length;
+extern uint8_t prox_state;
+extern uint8_t line_state;
+extern bool_t is_attacking;
 
 uint8_t time_check(uint32_t delay, uint32_t *timestamp) {
     uint8_t ret = (HAL_GetTick() - *timestamp >= delay);
@@ -20,48 +23,92 @@ start_state_t get_switch_state() {
 }
 
 void left_start() {
-    uint8_t counter = 0;
-    length = sprintf(buf, "Left starting");
-    CDC_Transmit_FS((uint8_t *)buf, length + 1);
+    uint32_t time_start = HAL_GetTick();
+    debug_message("left_start, motor control");
     while (1) {
-        HAL_Delay(1000);
-        counter += 1;
-        CDC_Transmit_FS((uint8_t *)".", 2);
-        if (counter == 5) {
-            length = sprintf(buf, "\n\rExiting left_start()\n\r");
-            CDC_Transmit_FS((uint8_t *)buf, length + 1);
+        update_front_prox(&prox_state);
+        if (prox_state) {
+            is_attacking = TRUE;
+            return;
+        } else if (HAL_GetTick() - time_start >= 1000) {
             return;
         }
     }
 }
 
 void right_start() {
-    uint8_t counter = 0;
-    length = sprintf(buf, "Right starting");
-    CDC_Transmit_FS((uint8_t *)buf, length + 1);
+    uint32_t time_start = HAL_GetTick();
+    debug_message("right_start, motor control");
     while (1) {
-        HAL_Delay(1000);
-        counter += 1;
-        CDC_Transmit_FS((uint8_t *)".", 2);
-        if (counter == 5) {
-            length = sprintf(buf, "\n\rExiting right_start()\n\r");
-            CDC_Transmit_FS((uint8_t *)buf, length + 1);
+        update_front_prox(&prox_state);
+        if (prox_state) {
+            is_attacking = TRUE;
+            return;
+        } else if (HAL_GetTick() - time_start >= 1000) {
             return;
         }
     }
 }
 
 void back_start() {
-    uint8_t counter = 0;
-    length = sprintf(buf, "Back starting");
-    CDC_Transmit_FS((uint8_t *)buf, length + 1);
+    uint32_t time_start = HAL_GetTick();
+    debug_message("back_start, motor control");
     while (1) {
-        HAL_Delay(1000);
-        counter += 1;
-        CDC_Transmit_FS((uint8_t *)".", 2);
-        if (counter == 5) {
-            length = sprintf(buf, "\n\rExiting back_start()\n\r");
-            CDC_Transmit_FS((uint8_t *)buf, length + 1);
+        update_front_prox(&prox_state);
+        if (prox_state) {
+            is_attacking = TRUE;
+            return;
+        } else if (HAL_GetTick() - time_start >= 1000) {
+            return;
+        }
+    }
+}
+
+void attacking() {
+    while (1) {
+        update_front_prox(&prox_state);
+        if (prox_state) {
+            debug_message("Attacking...");
+            HAL_Delay(125);
+        } else {
+            radar();
+        }
+        if ((sw1.port->IDR & sw1.pin_number) == GPIO_PIN_RESET) {
+            is_attacking = FALSE;
+            return;
+        }
+    }
+}
+
+void radar() {
+    debug_message("radar, motor control");
+    while (1) {
+        update_front_prox(&prox_state);
+        if (prox_state) return;
+        debug_message("radarig");
+        HAL_Delay(500);
+    }
+}
+
+void tracking() {
+}
+
+void katting() {
+}
+
+void normal() {
+    debug_message("normal, motor control");
+    while (1) {
+        update_front_prox(&prox_state);
+        if (prox_state) {
+            is_attacking = TRUE;
+            return;
+        }
+        if (line_state) {
+            turn_around();
+            debug_message("normal, motor control");
+        }
+        if ((sw1.port->IDR & sw1.pin_number) == GPIO_PIN_RESET) {
             return;
         }
     }
@@ -77,4 +124,9 @@ char *state_to_str(start_state_t cmd) {
         case TRACKING: return "Tracking";
         default: return "Invalid";
     }
+}
+
+void debug_message(const char *MSG) {
+    length = sprintf(buf, "%s\n\r", MSG);
+    CDC_FS_Transmit((uint8_t *)buf, length + 1);
 }
