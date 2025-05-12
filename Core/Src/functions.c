@@ -1,12 +1,14 @@
 #include "main.h"
 #include "zumobot.h"
 #include "tb6612fng.h"
+#include "ir_sensors.h"
 
 extern char buf[64];
 extern uint32_t length;
 extern uint8_t prox_state;
 extern uint8_t line_state;
 extern bool_t is_attacking;
+extern user_gpio_t sw1;
 
 uint8_t time_check(uint32_t delay, uint32_t *timestamp) {
     uint8_t ret = (HAL_GetTick() - *timestamp >= delay);
@@ -24,7 +26,7 @@ start_state_t get_switch_state() {
 
 void left_start() {
     uint32_t time_start = HAL_GetTick();
-    debug_message("left_start, motor control");
+    debug_message("left_start, motor control turn left");
     while (1) {
         update_front_prox(&prox_state);
         if (prox_state) {
@@ -38,7 +40,7 @@ void left_start() {
 
 void right_start() {
     uint32_t time_start = HAL_GetTick();
-    debug_message("right_start, motor control");
+    debug_message("right_start, motor control turn right");
     while (1) {
         update_front_prox(&prox_state);
         if (prox_state) {
@@ -68,7 +70,7 @@ void attacking() {
     while (1) {
         update_front_prox(&prox_state);
         if (prox_state) {
-            debug_message("Attacking...");
+            debug_message("attacking, attacking...");
             HAL_Delay(125);
         } else {
             radar();
@@ -81,19 +83,35 @@ void attacking() {
 }
 
 void radar() {
-    debug_message("radar, motor control");
+    debug_message("radar, motor control turning right");
     while (1) {
         update_front_prox(&prox_state);
         if (prox_state) return;
-        debug_message("radarig");
-        HAL_Delay(500);
+        debug_message("radar, radaring...");
+        HAL_Delay(125);
     }
 }
 
 void tracking() {
+    debug_message("tracking, tracking started.");
+    while (1) {
+        update_front_prox(&prox_state);
+        length = sprintf(buf, "<%ld> prox: %02d, line: %d\n\r",
+                         HAL_GetTick(),
+                         prox_state,
+                         line_state);
+        CDC_Transmit_FS((uint8_t *)buf, length + 1);
+
+        if ((sw1.port->IDR & sw1.pin_number) == GPIO_PIN_RESET) {
+            return;
+        }
+
+        HAL_Delay(125);
+    }
 }
 
 void katting() {
+    debug_message("katting, katting...");
 }
 
 void normal() {
@@ -136,6 +154,7 @@ char *state_to_str(start_state_t cmd) {
 }
 
 void debug_message(const char *MSG) {
-    length = sprintf(buf, "%s\n\r", MSG);
-    CDC_FS_Transmit((uint8_t *)buf, length + 1);
+    uint32_t timestamp = HAL_GetTick();
+    length = sprintf(buf, "<%ld> %s\n\r", timestamp, MSG);
+    CDC_Transmit_FS((uint8_t *)buf, length + 1);
 }

@@ -30,8 +30,10 @@ void setup() {
 
 void loop() {
     if ((sw1.port->IDR & sw1.pin_number) == GPIO_PIN_RESET) {
+        debug_message("SW1 off. Motor control stop");
         is_kat = FALSE;
         is_tracking = FALSE;
+        is_attacking = FALSE;
         state = get_switch_state();
         return;
     } else {
